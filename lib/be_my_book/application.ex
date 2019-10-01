@@ -14,6 +14,8 @@ defmodule BeMyBook.Application do
       # {BeMyBook.Worker, arg},
     ]
 
+    :ets.new(:books, [:public, :named_table])
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: BeMyBook.Supervisor]
