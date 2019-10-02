@@ -1,5 +1,7 @@
 <div id="container">
 </div>
+<div id="bookLink">
+</div>
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="knk0p1hgnl3y6oy"></script>
 <script>
   options = {
@@ -21,7 +23,7 @@
         },
         success: function(data) {
           console.log("Your request succeeded!");
-          console.log(data);
+          $('#bookLink').text(data);
         },
         error: function(data) {
           console.log("Your Request ended in an error");

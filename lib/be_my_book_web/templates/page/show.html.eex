@@ -1,0 +1,39 @@
+<style>
+.title {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 120%;
+}
+
+.body {
+  text-align: justify;
+}
+
+.body p {
+  text-indent: 2em;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+</style>
+
+<div>
+  <div class="title">
+    <%= @title %>
+  </div>
+  <div class="body">
+    <p><%= raw @body %></p>
+  </div>
+  <div class="left">
+    <%= link('Prev', to: @prev_url) %>
+  </div>
+  <div class="right">
+    <%= link('Next', to: @next_url) %>
+  </div>
+</div>

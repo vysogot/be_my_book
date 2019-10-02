@@ -24,7 +24,6 @@ defmodule BeMyBookWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", BeMyBookWeb do
     pipe_through :api
-
     post "/", PageController, :create
   end
 end

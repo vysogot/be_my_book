@@ -19,7 +19,10 @@ defmodule BeMyBookWeb.PageController do
     [head | _] = links
 
     :ets.insert(:books, { title, links })
-    json(conn, title)
+
+    url = Routes.url(conn) <> conn.request_path
+    new_url = url |> String.replace("/api", "")
+    json(conn, new_url <> title)
   end
 
   def show_without_title(conn, _params) do
@@ -40,14 +43,17 @@ defmodule BeMyBookWeb.PageController do
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
-    next_page = if current_page + 1 >= Enum.count(result), do: nil, else: current_page + 1
-    prev_page = if current_page <= 0, do: nil, else: current_page - 1
+    body = body |> String.replace("\n\t", "</p><p>")
+    IO.inspect current_page
+
+    next_page = if current_page + 1 > Enum.count(result), do: 1, else: current_page + 1
+    prev_page = if current_page <= 0, do: Enum.count(result) + 1, else: current_page - 1
 
     url = Routes.url(conn) <> conn.request_path
     next_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(next_page))
     prev_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(prev_page))
 
-    json(conn, %{
+    render(conn, "show.html", %{
       title: title,
       body: body,
       next_url: next_url,
