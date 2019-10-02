@@ -7,7 +7,9 @@ defmodule BeMyBookWeb.PageController do
 
   def create(conn, _params) do
     links = _params["urls"]
-            |> Enum.map fn {_, v} -> %{ v["name"] => v["link"] } end
+            |> Enum.map fn {k, v} -> %{
+              v["name"] => v["link"] |> String.slice(0..-2) |> Kernel.<>("1")
+            } end
 
 
     length = 4
@@ -20,13 +22,30 @@ defmodule BeMyBookWeb.PageController do
     json(conn, title)
   end
 
+  def show_without_title(conn, _params) do
+    show(conn, Map.put(_params, "page", "1"))
+  end
+
   def show(conn, _params) do
     [{ _, result }] = :ets.lookup(:books, _params["slug"])
+    current_page = String.to_integer(_params["page"])
+    current_index = current_page - 1
+    page = Enum.at(result, current_index)
+    [ title | _ ] = Map.keys(page)
 
-    json(conn, result)
-    # {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
-    #   "https://www.dropbox.com/s/o0fhensn1yly6mk/powie%C5%9B%C4%87.txt?dl=1",
-    #   "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
-    # )
+    {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
+      page[title],
+      "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
+    )
+
+    next = if current_page + 1 >= Enum.count(result), do: nil, else: current_page + 1
+    prev = if current_page <= 0, do: nil, else: current_page - 1
+
+    json(conn, %{
+      title: title,
+      body: body,
+      next: next,
+      prev: prev
+    })
   end
 end

@@ -17,7 +17,8 @@ defmodule BeMyBookWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    get "/:slug", PageController, :show
+    get "/:slug", PageController, :show_without_title
+    get "/:slug/:page", PageController, :show
   end
 
   # Other scopes may use custom stacks.
