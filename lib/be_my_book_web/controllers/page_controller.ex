@@ -23,7 +23,7 @@ defmodule BeMyBookWeb.PageController do
   end
 
   def show_without_title(conn, _params) do
-    show(conn, Map.put(_params, "page", "1"))
+    redirect(conn, to: "/" <> _params["slug"] <> "/1")
   end
 
   def show(conn, _params) do
@@ -31,21 +31,27 @@ defmodule BeMyBookWeb.PageController do
     current_page = String.to_integer(_params["page"])
     current_index = current_page - 1
     page = Enum.at(result, current_index)
-    [ title | _ ] = Map.keys(page)
+    [ key | _ ] = Map.keys(page)
+
+    title = key |> String.slice(0..-5) |> String.capitalize
 
     {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
-      page[title],
+      page[key],
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
-    next = if current_page + 1 >= Enum.count(result), do: nil, else: current_page + 1
-    prev = if current_page <= 0, do: nil, else: current_page - 1
+    next_page = if current_page + 1 >= Enum.count(result), do: nil, else: current_page + 1
+    prev_page = if current_page <= 0, do: nil, else: current_page - 1
+
+    url = Routes.url(conn) <> conn.request_path
+    next_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(next_page))
+    prev_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(prev_page))
 
     json(conn, %{
       title: title,
       body: body,
-      next: next,
-      prev: prev
+      next_url: next_url,
+      prev_url: prev_url
     })
   end
 end
