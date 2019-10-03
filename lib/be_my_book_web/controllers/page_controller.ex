@@ -59,13 +59,8 @@ defmodule BeMyBookWeb.PageController do
     next_page = if current_page + 1 > Enum.count(result), do: 1, else: current_page + 1
     prev_page = if current_page <= 0, do: Enum.count(result) + 1, else: current_page - 1
 
-    url = Routes.url(conn) <> conn.request_path
-    next_url = url
-               |> String.slice(0..-2)
-               |> Kernel.<>(Integer.to_string(next_page))
-    prev_url = url
-               |> String.slice(0..-2)
-               |> Kernel.<>(Integer.to_string(prev_page))
+    prev_url = Routes.page_path(conn, :show, params["slug"], prev_page)
+    next_url = Routes.page_path(conn, :show, params["slug"], next_page)
 
     render(conn, "show.html", %{
       title: title,
