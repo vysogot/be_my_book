@@ -45,10 +45,10 @@
   </div>
   <div class="links">
     <div class="left">
-      <%= link('<< Previous', to: @prev_url) %>
+      <%= link('<<<<<', to: @prev_url) %>
     </div>
     <div class="right">
-      <%= link('Next >>', to: @next_url) %>
+      <%= link('>>>>>', to: @next_url) %>
     </div>
     <div style="clear: both" />
   </div>
