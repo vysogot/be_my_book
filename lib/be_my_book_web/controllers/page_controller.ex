@@ -7,9 +7,9 @@ defmodule BeMyBookWeb.PageController do
     render(conn, "index.html")
   end
 
-  def create(conn, _params) do
-    links = _params["urls"]
-            |> Enum.map(fn {k, v} -> %{
+  def create(conn, params) do
+    links = params["urls"]
+            |> Enum.map(fn {_, v} -> %{
               title: v["name"]
               |> String.slice(0..-5)
               |> String.capitalize,
@@ -21,10 +21,8 @@ defmodule BeMyBookWeb.PageController do
 
     # require IEx; IEx.pry
 
-    length = 4
-    title = :crypto.strong_rand_bytes(length)
-            |> Base.encode64
-            |> binary_part(0, length)
+    title = EntropyString.token(:charset32)
+            |> String.slice(0..3)
 
     :ets.insert(:books, { title, links })
 
@@ -35,13 +33,13 @@ defmodule BeMyBookWeb.PageController do
     json(conn, link)
   end
 
-  def show_without_title(conn, _params) do
-    redirect(conn, to: "/" <> _params["slug"] <> "/1")
+  def show_without_title(conn, params) do
+    redirect(conn, to: "/" <> params["slug"] <> "/1")
   end
 
-  def show(conn, _params) do
-    [{ _, result }] = :ets.lookup(:books, _params["slug"])
-    current_page = String.to_integer(_params["page"])
+  def show(conn, params) do
+    [{ _, result }] = :ets.lookup(:books, params["slug"])
+    current_page = String.to_integer(params["page"])
     current_index = current_page - 1
     page = Enum.at(result, current_index)
 
@@ -50,8 +48,13 @@ defmodule BeMyBookWeb.PageController do
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
-    {:safe, title} = page[:title] |> HTML.html_escape
-    body = body |> HTML.html_escape |> elem(1) |> String.replace("\n", "</p><p>")
+    title = page[:title]
+            |> HTML.html_escape
+            |> HTML.safe_to_string
+    body = body
+           |> HTML.html_escape
+           |> HTML.safe_to_string
+           |> String.replace("\n", "</p><p>")
 
     next_page = if current_page + 1 > Enum.count(result), do: 1, else: current_page + 1
     prev_page = if current_page <= 0, do: Enum.count(result) + 1, else: current_page - 1
