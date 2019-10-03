@@ -8,21 +8,27 @@ defmodule BeMyBookWeb.PageController do
   def create(conn, _params) do
     links = _params["urls"]
             |> Enum.map fn {k, v} -> %{
-              v["name"] => v["link"] |> String.slice(0..-2) |> Kernel.<>("1")
+              title: v["name"],
+              link: v["link"]
+              |> String.slice(0..-2)
+              |> Kernel.<>("1")
             } end
 
+    #require IEx; IEx.pry
+    #|> Enum.sort_by(&(&1))
 
     length = 4
-    title = :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
-
-    #require IEx; IEx.pry
-    [head | _] = links
+    title = :crypto.strong_rand_bytes(length)
+            |> Base.encode64
+            |> binary_part(0, length)
 
     :ets.insert(:books, { title, links })
 
-    url = Routes.url(conn) <> conn.request_path
-    new_url = url |> String.replace("/api", "")
-    json(conn, new_url <> title)
+    link = Routes.url(conn) <> conn.request_path
+          |> String.replace("/api", "")
+          |> Kernel.<>(title)
+
+    json(conn, link)
   end
 
   def show_without_title(conn, _params) do
@@ -34,24 +40,28 @@ defmodule BeMyBookWeb.PageController do
     current_page = String.to_integer(_params["page"])
     current_index = current_page - 1
     page = Enum.at(result, current_index)
-    [ key | _ ] = Map.keys(page)
 
-    title = key |> String.slice(0..-5) |> String.capitalize
+    title = page[:title]
+            |> String.slice(0..-5)
+            |> String.capitalize
 
     {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
-      page[key],
+      page[:link],
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
     body = body |> String.replace("\n\t", "</p><p>")
-    IO.inspect current_page
 
     next_page = if current_page + 1 > Enum.count(result), do: 1, else: current_page + 1
     prev_page = if current_page <= 0, do: Enum.count(result) + 1, else: current_page - 1
 
     url = Routes.url(conn) <> conn.request_path
-    next_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(next_page))
-    prev_url = url |> String.slice(0..-2) |> Kernel.<>(Integer.to_string(prev_page))
+    next_url = url
+               |> String.slice(0..-2)
+               |> Kernel.<>(Integer.to_string(next_page))
+    prev_url = url
+               |> String.slice(0..-2)
+               |> Kernel.<>(Integer.to_string(prev_page))
 
     render(conn, "show.html", %{
       title: title,
