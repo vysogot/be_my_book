@@ -7,6 +7,14 @@
 # General application configuration
 use Mix.Config
 
+config :be_my_book, ecto_repos: [BeMyBook.Repo]
+config :be_my_book, BeMyBook.Repo,
+  database: "be_my_book_repo",
+  username: "be_my_book_user",
+  password: "password",
+  hostname: "localhost",
+  port: 5496
+
 # Configures the endpoint
 config :be_my_book, BeMyBookWeb.Endpoint,
   url: [host: "localhost"],
