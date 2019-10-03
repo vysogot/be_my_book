@@ -1,8 +1,14 @@
 <style>
+.text {
+  font-family: Verdana;
+  color: #313135;
+}
+
 .title {
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20px;
+  margin-top: 3em;
+  margin-bottom: 2em;
   font-size: 120%;
 }
 
@@ -12,6 +18,13 @@
 
 .body p {
   text-indent: 2em;
+  margin: 0;
+  line-height: 190%;
+}
+
+.links {
+  margin-top: 3em;
+  margin-bottom: 2em;
 }
 
 .left {
@@ -23,17 +36,20 @@
 }
 </style>
 
-<div>
+<div class="text">
   <div class="title">
     <%= @title %>
   </div>
   <div class="body">
     <p><%= raw @body %></p>
   </div>
-  <div class="left">
-    <%= link('Prev', to: @prev_url) %>
-  </div>
-  <div class="right">
-    <%= link('Next', to: @next_url) %>
+  <div class="links">
+    <div class="left">
+      <%= link('<< Previous', to: @prev_url) %>
+    </div>
+    <div class="right">
+      <%= link('Next >>', to: @next_url) %>
+    </div>
+    <div style="clear: both" />
   </div>
 </div>

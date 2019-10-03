@@ -1,6 +1,7 @@
 <div id="container">
 </div>
-<div id="bookLink">
+<div>
+  <a id="bookLink" href=""></a>
 </div>
 <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="knk0p1hgnl3y6oy"></script>
 <script>
@@ -24,6 +25,7 @@
         success: function(data) {
           console.log("Your request succeeded!");
           $('#bookLink').text(data);
+          $('#bookLink').attr('href', data);
         },
         error: function(data) {
           console.log("Your Request ended in an error");

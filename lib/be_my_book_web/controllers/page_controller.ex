@@ -1,21 +1,25 @@
 defmodule BeMyBookWeb.PageController do
   use BeMyBookWeb, :controller
 
+  alias Phoenix.HTML
+
   def index(conn, _params) do
     render(conn, "index.html")
   end
 
   def create(conn, _params) do
     links = _params["urls"]
-            |> Enum.map fn {k, v} -> %{
-              title: v["name"],
+            |> Enum.map(fn {k, v} -> %{
+              title: v["name"]
+              |> String.slice(0..-5)
+              |> String.capitalize,
               link: v["link"]
               |> String.slice(0..-2)
               |> Kernel.<>("1")
-            } end
+            } end)
+            |> Enum.sort_by(&(&1.title))
 
-    #require IEx; IEx.pry
-    #|> Enum.sort_by(&(&1))
+    # require IEx; IEx.pry
 
     length = 4
     title = :crypto.strong_rand_bytes(length)
@@ -41,16 +45,13 @@ defmodule BeMyBookWeb.PageController do
     current_index = current_page - 1
     page = Enum.at(result, current_index)
 
-    title = page[:title]
-            |> String.slice(0..-5)
-            |> String.capitalize
-
     {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
       page[:link],
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
-    body = body |> String.replace("\n\t", "</p><p>")
+    {:safe, title} = page[:title] |> HTML.html_escape
+    body = body |> HTML.html_escape |> elem(1) |> String.replace("\n", "</p><p>")
 
     next_page = if current_page + 1 > Enum.count(result), do: 1, else: current_page + 1
     prev_page = if current_page <= 0, do: Enum.count(result) + 1, else: current_page - 1
