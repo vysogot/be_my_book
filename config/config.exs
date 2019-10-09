@@ -7,6 +7,8 @@
 # General application configuration
 use Mix.Config
 
+config :be_my_book, ecto_repos: [BeMyBook.Repo]
+
 # Configures the endpoint
 config :be_my_book, BeMyBookWeb.Endpoint,
   url: [host: "localhost"],
