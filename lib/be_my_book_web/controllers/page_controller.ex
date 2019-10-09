@@ -1,7 +1,12 @@
 defmodule BeMyBookWeb.PageController do
   use BeMyBookWeb, :controller
 
+  import Ecto.Query, only: [from: 2]
+  import Ecto.Changeset, only: [change: 2]
+
   alias Phoenix.HTML
+  alias BeMyBook.Repo
+  alias BeMyBook.Book
 
   def index(conn, _params) do
     render(conn, "index.html")
@@ -19,12 +24,10 @@ defmodule BeMyBookWeb.PageController do
             } end)
             |> Enum.sort_by(&(&1.title))
 
-    # require IEx; IEx.pry
-
     title = EntropyString.token(:charset32)
             |> String.slice(0..3)
 
-    :ets.insert(:books, { title, links })
+    Repo.insert!(%Book{title: title, contents: links})
 
     link = Routes.url(conn) <> conn.request_path
           |> String.replace("/api", "")
@@ -38,17 +41,21 @@ defmodule BeMyBookWeb.PageController do
   end
 
   def show(conn, params) do
-    [{ _, result }] = :ets.lookup(:books, params["slug"])
+    query = from b in Book,
+      where: b.title == ^params["slug"]
+
+    %{ contents: result } = Repo.one(query)
+
     current_page = String.to_integer(params["page"])
     current_index = current_page - 1
     page = Enum.at(result, current_index)
 
     {:ok, %HTTPoison.Response{body: body}} = HTTPoison.request(:get,
-      page[:link],
+      page["link"],
       "", [], [follow_redirect: true, hackney: [{:force_redirect, true}]]
     )
 
-    title = page[:title]
+    title = page["title"]
             |> HTML.html_escape
             |> HTML.safe_to_string
     body = body

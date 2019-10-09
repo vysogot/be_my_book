@@ -9,13 +9,11 @@ defmodule BeMyBook.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      BeMyBookWeb.Endpoint
-      # {BeMyBook.Repo, []}
+      BeMyBookWeb.Endpoint,
+      {BeMyBook.Repo, []}
       # Starts a worker by calling: BeMyBook.Worker.start_link(arg)
       # {BeMyBook.Worker, arg},
     ]
-
-    :ets.new(:books, [:public, :named_table])
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

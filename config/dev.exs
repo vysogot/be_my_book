@@ -1,5 +1,13 @@
 use Mix.Config
 
+config :be_my_book, ecto_repos: [BeMyBook.Repo]
+config :be_my_book, BeMyBook.Repo,
+  database: "be_my_book_repo",
+  username: "be_my_book_user",
+  password: "password",
+  hostname: "localhost",
+  port: 5496
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
