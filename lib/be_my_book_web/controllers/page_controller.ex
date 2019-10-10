@@ -29,9 +29,7 @@ defmodule BeMyBookWeb.PageController do
 
     Repo.insert!(%Book{title: title, contents: links})
 
-    link = Routes.url(conn) <> conn.request_path
-          |> String.replace("/api", "")
-          |> Kernel.<>(title)
+    link = Routes.page_url(conn, :show, title, 1)
 
     json(conn, link)
   end
