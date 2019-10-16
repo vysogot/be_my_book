@@ -39,6 +39,7 @@ defmodule BeMyBookWeb.PageController do
   end
 
   def show(conn, params) do
+    IO.inspect Repo.all(Book)
     query = from b in Book,
       where: b.title == ^params["slug"]
 
