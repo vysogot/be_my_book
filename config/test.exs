@@ -1,17 +1,30 @@
-use Mix.Config
+import Config
 
+# Configure your database
+#
+# The MIX_TEST_PARTITION environment variable can be used
+# to provide built-in test partitioning in CI environment.
+# Run `mix help test` for more information.
 config :be_my_book, BeMyBook.Repo,
-  database: "be_my_book_test",
-  username: "be_my_book_user",
-  password: "password",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  port: 5496
+  database: "be_my_book_test#{System.get_env("MIX_TEST_PARTITION")}",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 10
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :be_my_book, BeMyBookWeb.Endpoint,
-  url: [scheme: "http", host: "localhost", port: "4002"],
+  http: [ip: {127, 0, 0, 1}, port: 4002],
+  secret_key_base: "gf07Cqpm/8/R1dPuxzVc4dtMT2fiJRLyAUFXbwr5gTEhi5dTvC5jlcJR1me1hN9t",
   server: false
+
+# In test we don't send emails.
+config :be_my_book, BeMyBook.Mailer, adapter: Swoosh.Adapters.Test
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+# Initialize plugs at runtime for faster test compilation
+config :phoenix, :plug_init_mode, :runtime
